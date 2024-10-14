@@ -1,0 +1,234 @@
+{% extends 'employee/base.html' %}
+
+{% block content %}
+<style>
+    /* General body styles */
+body {
+    background: linear-gradient(to right, #acebc8, #87ceeb);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Header styles */
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Row hover effect */
+tbody tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+/* Alternate row colors */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Links inside table cells */
+a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #388E3C;
+}
+
+/* Action buttons container */
+td[data-label="Actions"] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    padding: 10px 0;
+}
+
+/* Action buttons styles */
+td form button,
+td a {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-block;
+    text-align: center;
+    min-width: 80px;  /* Ensure buttons are of uniform size */
+}
+
+/* Hover and active effects for action buttons */
+td form button:hover,
+td a:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+td form button:active,
+td a:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments for action buttons */
+@media screen and (max-width: 768px) {
+    td[data-label="Actions"] {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    td form button,
+    td a {
+        margin: 8px 0;
+        width: 100%;  /* Make buttons full width on mobile */
+    }
+}
+
+/* Responsive adjustments for the table */
+@media screen and (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+    }
+
+    th {
+        display: none;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        display: block;
+        border-bottom: 2px solid #ddd;
+    }
+
+    td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 15px;
+        border: none;
+        border-bottom: 1px solid #ddd;
+    }
+
+    td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        flex-basis: 50%;
+        padding-right: 10px;
+    }
+}
+
+/* Centered heading */
+h2 {
+    text-align: center;
+    color: #4CAF50;
+    font-size: 32px;
+    margin-top: 30px;
+}
+
+.logout-link {
+    display: block;
+    text-align: center;
+    color: #4CAF50;
+    margin-top: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.logout-link:hover {
+    text-decoration: underline;
+}
+
+</style>
+
+<h2>Admin Dashboard</h2>
+<form method="GET" action="{% url 'admin_dashboard' %}">
+        <label for="location">Select Location:</label>
+        <select name="location" id="location" onchange="this.form.submit()">
+            <option value="">All Locations</option>
+            {% for location in locations %}
+                <option value="{{ location.id }}" {% if location.id|stringformat:"s" == selected_location_id|stringformat:"s" %}selected{% endif %}>
+                    {{ location.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Location</th>
+            <th>DOB</th>
+            <th>Emergency Contact</th>
+            <th>Home Address</th>
+            <th>Work Address</th>
+            <th>Employee Type</th>
+            <th>Travel Document</th>
+            <th>Social Security</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for employee in employees %}
+        <tr>
+            <td data-label="Name">{{ employee.name }}</td>
+            <td data-label="Phone">{{ employee.phone }}</td>
+            <td data-label="Email">{{ employee.email }}</td>
+            <td data-label="Department">{{ employee.department }}</td>
+            <td data-label="Location">{{ employee.location}}</td>
+            <td data-label="DOB">{{ employee.dob|date:"d/m/Y" }}</td>
+            <td data-label="Emergency Contact">{{ employee.emergency_contact }}</td>
+            <td data-label="Home Address">{{ employee.home_address }}</td>
+            <td data-label="Work Address">{{ employee.work_address }}</td>
+            <td data-label="Employee Type">{{ employee.get_employee_type_display }}</td>
+            <td data-label="Travel Document">
+                {% if employee.travel_document %}
+                    <a href="{{ employee.travel_document.url }}" target="_blank">View</a>
+                {% else %}
+                    No document
+                {% endif %}
+            </td>
+            <td data-label="Social Security">{{ employee.social_security }}</td>
+            <td data-label="Actions">
+                <a href="{% url 'edit_employee' employee.id %}">Edit</a>
+                <a href="{% url 'employee_delete' employee.id %}">Delete</a>
+                <a href="{% url 'employee_registration' %}"> Add</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}
